@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Desktop Multi-Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Barra de herramientas con selector de perfiles -->
+        <div class="toolbar">
+            <div class="profile-selector">
+                <label for="profileSelect">Perfil:</label>
+                <select id="profileSelect">
+                    <option value="">Seleccionar perfil...</option>
+                </select>
+                <button id="refreshProfilesBtn" class="btn-icon" title="Actualizar perfiles">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="toolbar-actions">
+                <button id="createProfileBtn" class="btn-primary">Crear Perfil</button>
+                <button id="editProfileBtn" class="btn-secondary" disabled>Editar</button>
+                <button id="deleteProfileBtn" class="btn-danger" disabled>Borrar</button>
+                <button id="debugBtn" class="btn-secondary" style="margin-left: 10px;">Debug</button>
+            </div>
+        </div>
+
+        <!-- Área principal para webviews -->
+        <div class="main-content">
+            <div id="webviewContainer">
+                <!-- Modal de bienvenida (se muestra cuando no hay perfiles) -->
+                <div id="welcomeModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="welcome-content">
+                            <img src="../assets/whatsapp_icon.png" alt="WhatsApp" class="welcome-icon">
+                            <h2>¡Bienvenido a WhatsApp Multi-Profile!</h2>
+                            <p>Para comenzar, crea tu primer perfil de WhatsApp.</p>
+                            <button id="createFirstProfileBtn" class="btn-primary btn-large">
+                                Crear Mi Primer Perfil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placeholder cuando no hay perfil seleccionado -->
+                <div id="noProfileSelected" class="placeholder" style="display: none;">
+                    <div class="placeholder-content">
+                        <img src="../assets/whatsapp_icon.png" alt="WhatsApp" class="placeholder-icon">
+                        <h3>Selecciona un perfil para comenzar</h3>
+                        <p>Elige un perfil del selector de arriba o crea uno nuevo.</p>
+                    </div>
+                </div>
+
+                <!-- Contenedor para los webviews -->
+                <div id="webviews"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar perfiles -->
+    <div id="profileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Crear Nuevo Perfil</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="profileName">Nombre del Perfil:</label>
+                        <input type="text" id="profileName" name="name" required maxlength="50" 
+                               placeholder="Ej: Personal, Trabajo, Familia...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileDescription">Descripción (opcional):</label>
+                        <textarea id="profileDescription" name="description" maxlength="200" 
+                                  placeholder="Descripción del perfil..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profileColor">Color del perfil:</label>
+                        <div class="color-options">
+                            <input type="radio" id="color1" name="color" value="#25D366" checked>
+                            <label for="color1" class="color-option" style="background-color: #25D366;"></label>
+                            
+                            <input type="radio" id="color2" name="color" value="#128C7E">
+                            <label for="color2" class="color-option" style="background-color: #128C7E;"></label>
+                            
+                            <input type="radio" id="color3" name="color" value="#075E54">
+                            <label for="color3" class="color-option" style="background-color: #075E54;"></label>
+                            
+                            <input type="radio" id="color4" name="color" value="#34B7F1">
+                            <label for="color4" class="color-option" style="background-color: #34B7F1;"></label>
+                            
+                            <input type="radio" id="color5" name="color" value="#FF6B6B">
+                            <label for="color5" class="color-option" style="background-color: #FF6B6B;"></label>
+                            
+                            <input type="radio" id="color6" name="color" value="#4ECDC4">
+                            <label for="color6" class="color-option" style="background-color: #4ECDC4;"></label>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="profileId" name="id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelBtn">Cancelar</button>
+                <button type="submit" form="profileForm" class="btn-primary" id="saveProfileBtn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para borrar perfiles -->
+    <div id="deleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Eliminación</h3>
+                <button class="modal-close" id="closeDeleteModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar el perfil <strong id="deleteProfileName"></strong>?</p>
+                <p class="warning">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+                <button type="button" class="btn-danger" id="confirmDeleteBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

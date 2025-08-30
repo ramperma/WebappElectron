@@ -1,0 +1,43 @@
+{
+  "name": "whatsapp-desktop-multiprofile",
+  "version": "1.0.0",
+  "description": "Aplicación de WhatsApp de escritorio con soporte para múltiples perfiles",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": [
+    "whatsapp",
+    "electron",
+    "desktop",
+    "multiprofile"
+  ],
+  "author": "WhatsApp Desktop Multi-Profile",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "build": {
+    "appId": "com.whatsapp.desktop.multiprofile",
+    "productName": "WhatsApp Desktop Multi-Profile",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "linux": {
+      "target": "AppImage",
+      "category": "Network",
+      "icon": "assets/whatsapp_icon.png"
+    }
+  }
+}
