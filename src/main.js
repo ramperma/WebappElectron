@@ -7,6 +7,7 @@ const store = new Store();
 
 let mainWindow;
 let tray;
+let forceQuit = false;
 
 // Configuración de la aplicación
 const APP_CONFIG = {
@@ -43,7 +44,7 @@ function createMainWindow() {
   mainWindow.on('close', (event) => {
     const minimizeOnClose = store.get('minimizeOnClose', false);
     
-    if (minimizeOnClose) {
+    if (!forceQuit && minimizeOnClose) {
       event.preventDefault();
       mainWindow.hide();
     } else {
@@ -60,6 +61,19 @@ function createMainWindow() {
 
 function createApplicationMenu() {
   const template = [
+    {
+      label: 'Archivo',
+      submenu: [
+        {
+          label: 'Salir',
+          accelerator: 'CmdOrCtrl+Q',
+          click: () => {
+            forceQuit = true;
+            app.quit();
+          }
+        }
+      ]
+    },
     {
       label: 'Perfiles',
       submenu: [
@@ -194,6 +208,7 @@ function createSystemTray() {
     {
       label: 'Salir',
       click: () => {
+        forceQuit = true;
         app.quit();
       }
     }
@@ -315,6 +330,10 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  forceQuit = true;
 });
 
 // Prevenir múltiples instancias
